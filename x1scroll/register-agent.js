@@ -38,7 +38,7 @@ const bs58decode = (typeof bs58.decode === 'function') ? bs58.decode : bs58.defa
 
 // ── Protocol constants ────────────────────────────────────────────────────────
 const PROGRAM_ID = new PublicKey('ECgaMEwH4KLSz3awDo1vz84mSrx5n6h1ZCrbmunB5UxB');
-const TREASURY   = new PublicKey('GmvrL1ymC9ENuQCUqymC9robGa9t9L59AbFiwhDDd4Ld');
+const TREASURY   = new PublicKey('A1TRS3i2g62Zf6K4vybsW4JLx8wifqSoThyTQqXNaLDK');
 const FEE_REGISTER_AGENT = 50_000_000; // 0.05 XNT
 
 // Anchor discriminator: sha256("global:register_agent")[0..8]
@@ -86,9 +86,9 @@ function loadKeypair(filePath) {
 }
 
 // ── PDA derivation ────────────────────────────────────────────────────────────
-function deriveAgentPDA(humanPubkey) {
+function deriveAgentPDA(humanPubkey, agentName) {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from('agent'), humanPubkey.toBuffer()],
+    [Buffer.from('agent'), humanPubkey.toBuffer(), Buffer.from(agentName, 'utf8')],
     PROGRAM_ID
   );
 }
@@ -157,7 +157,7 @@ async function main() {
   }
 
   // Derive PDA
-  const [agentPDA] = deriveAgentPDA(kp.publicKey);
+  const [agentPDA] = deriveAgentPDA(kp.publicKey, args.name);
   console.log(`\n📍 Agent PDA: ${agentPDA.toBase58()}`);
 
   // Check if already registered
@@ -190,13 +190,14 @@ async function main() {
 
   const ix = new TransactionInstruction({ programId: PROGRAM_ID, keys, data });
 
-  const { blockhash } = await conn.getLatestBlockhash('confirmed');
+  const { blockhash } = await conn.getLatestBlockhash('finalized');
   const tx = new Transaction({ recentBlockhash: blockhash, feePayer: kp.publicKey }).add(ix);
   tx.sign(kp);
 
   const sig = await conn.sendRawTransaction(tx.serialize(), {
     skipPreflight: false,
-    preflightCommitment: 'confirmed',
+    preflightCommitment: 'finalized',
+    maxRetries: 5,
   });
 
   console.log(`\n⏳ Confirming... (polling)`);

@@ -1,0 +1,23 @@
+node_modules/
+.env
+config.json
+*.key
+*.pem
+*.json.bak
+
+# Keypair files — NEVER commit these
+*-keypair.json
+keypair.json
+wallet.json
+id.json
+
+# Logs
+*.log
+disk_alert.log
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

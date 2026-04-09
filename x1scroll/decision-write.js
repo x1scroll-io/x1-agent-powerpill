@@ -33,7 +33,7 @@ const bs58 = require('bs58');
 const bs58decode = (typeof bs58.decode === 'function') ? bs58.decode : bs58.default.decode;
 
 // ── Protocol constants ────────────────────────────────────────────────────────
-const PROGRAM_ID = new PublicKey('AKrx1X75v7MrFcVTnjxoA7VFvDh8ZZmaEw7SDehweCXa');
+const PROGRAM_ID = new PublicKey('ECgaMEwH4KLSz3awDo1vz84mSrx5n6h1ZCrbmunB5UxB');
 const TREASURY   = new PublicKey('A1TRS3i2g62Zf6K4vybsW4JLx8wifqSoThyTQqXNaLDK');
 
 // Anchor discriminator: sha256("global:decision_write")[0..8]
@@ -72,6 +72,7 @@ function parseArgs() {
     if (args[i] === '--keypair') out.keypair = args[++i];
     if (args[i] === '--type')    out.type    = args[++i];
     if (args[i] === '--message') out.message = args[++i];
+    if (args[i] === '--name')    out.name    = args[++i];
     if (args[i] === '--cid')     out.cid     = args[++i];
     if (args[i] === '--rpc')     out.rpc     = args[++i];
   }
@@ -88,9 +89,9 @@ function loadKeypair(filePath) {
 }
 
 // ── PDA derivation ────────────────────────────────────────────────────────────
-function deriveAgentPDA(humanPubkey) {
+function deriveAgentPDA(humanPubkey, agentName) {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from('agent'), humanPubkey.toBuffer()],
+    [Buffer.from('agent'), humanPubkey.toBuffer(), Buffer.from(agentName, 'utf8')],
     PROGRAM_ID
   );
 }
@@ -133,7 +134,7 @@ async function main() {
   console.log(`\n🔑 Wallet  : ${kp.publicKey.toBase58()}`);
 
   // Verify agent is registered
-  const [agentPDA] = deriveAgentPDA(kp.publicKey);
+  const [agentPDA] = deriveAgentPDA(kp.publicKey, args.name);
   const agentAccount = await conn.getAccountInfo(agentPDA);
   if (!agentAccount) {
     console.error(`\n❌ No agent registered for this wallet. Run register-agent.js first.`);

@@ -33,7 +33,7 @@ const bs58decode = (typeof bs58.decode === 'function') ? bs58.decode : bs58.defa
 
 // ── Protocol constants ────────────────────────────────────────────────────────
 const PROGRAM_ID = new PublicKey('ECgaMEwH4KLSz3awDo1vz84mSrx5n6h1ZCrbmunB5UxB');
-const TREASURY   = new PublicKey('GmvrL1ymC9ENuQCUqymC9robGa9t9L59AbFiwhDDd4Ld');
+const TREASURY   = new PublicKey('A1TRS3i2g62Zf6K4vybsW4JLx8wifqSoThyTQqXNaLDK');
 const FEE_STORE_MEMORY = 1_000_000; // 0.001 XNT
 
 const DISCRIMINATOR = crypto
@@ -54,6 +54,7 @@ function parseArgs() {
   const out  = { keypair: null, cid: null, rpc: 'https://x1scroll.io/rpc' };
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--keypair') out.keypair = args[++i];
+    if (args[i] === '--name')    out.name    = args[++i];
     if (args[i] === '--cid')     out.cid     = args[++i];
     if (args[i] === '--rpc')     out.rpc     = args[++i];
   }
@@ -68,9 +69,9 @@ function loadKeypair(filePath) {
   throw new Error('Unrecognized keypair format.');
 }
 
-function deriveAgentPDA(humanPubkey) {
+function deriveAgentPDA(humanPubkey, agentName) {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from('agent'), humanPubkey.toBuffer()],
+    [Buffer.from('agent'), humanPubkey.toBuffer(), Buffer.from(agentName, 'utf8')],
     PROGRAM_ID
   );
 }
@@ -96,7 +97,7 @@ async function main() {
 
   const kp   = loadKeypair(path.resolve(args.keypair));
   const conn = new Connection(args.rpc, 'confirmed');
-  const [agentPDA] = deriveAgentPDA(kp.publicKey);
+  const [agentPDA] = deriveAgentPDA(kp.publicKey, args.name);
 
   console.log(`\n🧠 Store Memory`);
   console.log(`   Wallet   : ${kp.publicKey.toBase58()}`);

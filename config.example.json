@@ -1,0 +1,19 @@
+{
+  "rpc_url": "https://rpc.x1.xyz",
+  "wallet_address": "YOUR_WALLET_ADDRESS",
+  "validator_identity": "YOUR_VALIDATOR_IDENTITY",
+  "treasury_address": "YOUR_TREASURY_ADDRESS",
+  "api_key": "YOUR_API_KEY",
+  "alert_threshold_disk": 85,
+  "alert_threshold_xnt": 0.1,
+
+  "_notes": {
+    "rpc_url": "Public X1 RPC. Use your own node for higher rate limits.",
+    "wallet_address": "Your main wallet public key (never put private keys here).",
+    "validator_identity": "Your validator identity pubkey (node public key, not vote account).",
+    "treasury_address": "x1scroll.io treasury wallet for escrow verification.",
+    "api_key": "Optional — for external APIs that require authentication.",
+    "alert_threshold_disk": "Disk usage % to trigger alerts (85 = alert at 85% full).",
+    "alert_threshold_xnt": "XNT balance threshold for low-gas warnings (0.1 XNT)."
+  }
+}
